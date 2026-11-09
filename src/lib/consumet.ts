@@ -1,6 +1,6 @@
 import { AnimeEpisode, AnimeStreamData } from "./types";
 
-// Supported Consumet base endpoints (self-hosted or public mirror)
+// Supported Consumet base endpoints (used only if direct @consumet/extensions library is unavailable)
 const PRIMARY_CONSUMET_URL =
   process.env.CONSUMET_API_URL?.replace(/\/$/, "") || "https://consumet-api.vercel.app";
 const BACKUP_CONSUMET_URL = "https://api.consumet.org";
@@ -34,7 +34,24 @@ export interface ConsumetAnimeInfo {
   }[];
 }
 
-// Robust fetcher across primary and fallback Consumet endpoints with timeout
+/**
+ * Direct scraper instance loader via @consumet/extensions.
+ * Allows running Consumet directly in Node.js WITHOUT hosting or contacting any external API server!
+ */
+async function getDirectGogoanime() {
+  try {
+    // Dynamic import to prevent client-side bundle pollution
+    const consumet = await import("@consumet/extensions");
+    if (consumet?.ANIME?.Gogoanime) {
+      return new consumet.ANIME.Gogoanime();
+    }
+  } catch {
+    // @consumet/extensions not yet installed or running in client bundle
+  }
+  return null;
+}
+
+// Fallback HTTP fetcher across mirror endpoints if direct scraper package is not installed
 async function fetchWithFallback(path: string): Promise<any | null> {
   const urls = [PRIMARY_CONSUMET_URL, BACKUP_CONSUMET_URL];
 
@@ -56,7 +73,6 @@ async function fetchWithFallback(path: string): Promise<any | null> {
         return await res.json();
       }
     } catch {
-      // Continue to next mirror if request times out or fails
       continue;
     }
   }
@@ -64,48 +80,135 @@ async function fetchWithFallback(path: string): Promise<any | null> {
   return null;
 }
 
-// 1. Search Anime on Consumet (Gogoanime / Zoro)
+/**
+ * 1. Search Anime
+ * Priority: Direct @consumet/extensions -> Fallback API URL
+ */
 export async function searchConsumetAnime(
   query: string,
   provider = "gogoanime"
 ): Promise<ConsumetSearchResult[]> {
+  // Try direct library first (TANPA SERVER API)
+  const directProvider = await getDirectGogoanime();
+  if (directProvider) {
+    try {
+      const res = await directProvider.search(query.trim());
+      if (res?.results && Array.isArray(res.results)) {
+        return res.results.map((r: any) => ({
+          id: r.id,
+          title: typeof r.title === "string" ? r.title : r.title?.romaji || r.title?.english || query,
+          url: r.url || "",
+          image: r.image || "",
+          releaseDate: r.releaseDate,
+          subOrDub: r.subOrDub,
+        }));
+      }
+    } catch (err) {
+      console.warn("Direct @consumet/extensions search failed, using fallback:", err);
+    }
+  }
+
+  // Fallback via HTTP
   const cleanQuery = encodeURIComponent(query.trim());
   const data = await fetchWithFallback(`/anime/${provider}/${cleanQuery}`);
-
   if (data?.results && Array.isArray(data.results)) {
     return data.results;
   }
   return [];
 }
 
-// 2. Fetch Anime Details & Episode List from Consumet
+/**
+ * 2. Fetch Anime Details & Episode List
+ * Priority: Direct @consumet/extensions -> Fallback API URL
+ */
 export async function getConsumetAnimeInfo(
   consumetId: string,
   provider = "gogoanime"
 ): Promise<ConsumetAnimeInfo | null> {
+  // Try direct library first (TANPA SERVER API)
+  const directProvider = await getDirectGogoanime();
+  if (directProvider) {
+    try {
+      const info = await directProvider.fetchAnimeInfo(consumetId);
+      if (info?.episodes && Array.isArray(info.episodes)) {
+        return {
+          id: info.id,
+          title: typeof info.title === "string" ? info.title : info.title?.romaji || consumetId,
+          url: info.url || "",
+          genres: info.genres || [],
+          totalEpisodes: info.totalEpisodes || info.episodes.length,
+          image: info.image || "",
+          releaseDate: info.releaseDate,
+          description: info.description,
+          subOrDub: info.subOrDub || "sub",
+          type: info.type || "TV",
+          status: info.status || "Completed",
+          episodes: info.episodes.map((ep: any) => ({
+            id: ep.id,
+            number: ep.number,
+            url: ep.url,
+          })),
+        };
+      }
+    } catch (err) {
+      console.warn("Direct @consumet/extensions fetchAnimeInfo failed, using fallback:", err);
+    }
+  }
+
+  // Fallback via HTTP
   const cleanId = encodeURIComponent(consumetId);
   const data = await fetchWithFallback(`/anime/${provider}/info/${cleanId}`);
-
   if (data?.episodes && Array.isArray(data.episodes)) {
     return data as ConsumetAnimeInfo;
   }
   return null;
 }
 
-// 3. Extract Streaming Sources (.m3u8 HLS streams) for an Episode
+/**
+ * 3. Extract Streaming Sources (.m3u8 HLS streams)
+ * Priority: Direct @consumet/extensions -> Fallback API URL -> Verified HLS demo stream
+ */
 export async function getConsumetEpisodeStream(
   episodeId: string,
   provider = "gogoanime",
   server?: string
 ): Promise<AnimeStreamData> {
+  // Try direct library first (TANPA SERVER API)
+  const directProvider = await getDirectGogoanime();
+  if (directProvider) {
+    try {
+      const sources = await directProvider.fetchEpisodeSources(episodeId, server as any);
+      if (sources?.sources && Array.isArray(sources.sources) && sources.sources.length > 0) {
+        return {
+          headers: sources.headers || {
+            Referer: "https://vidstreaming.io/",
+          },
+          sources: sources.sources.map((s: any) => ({
+            url: s.url,
+            isM3U8: s.isM3U8 ?? (typeof s.url === "string" && s.url.includes(".m3u8")),
+            quality: s.quality || "default",
+          })),
+          download: sources.download,
+          subtitles: Array.isArray(sources.subtitles)
+            ? sources.subtitles.map((sub: any, idx: number) => ({
+                id: `sub-${idx}`,
+                label: sub.lang || `Sub ${idx + 1}`,
+                lang: sub.lang?.slice(0, 2).toLowerCase() || "en",
+                src: sub.url,
+              }))
+            : undefined,
+        };
+      }
+    } catch (err) {
+      console.warn("Direct @consumet/extensions fetchEpisodeSources failed, using fallback:", err);
+    }
+  }
+
+  // Fallback via HTTP
   const queryParam = server ? `?server=${encodeURIComponent(server)}` : "";
   const cleanEpId = encodeURIComponent(episodeId);
+  const data = await fetchWithFallback(`/anime/${provider}/watch/${cleanEpId}${queryParam}`);
 
-  const data = await fetchWithFallback(
-    `/anime/${provider}/watch/${cleanEpId}${queryParam}`
-  );
-
-  // If live Consumet streaming sources returned successfully
   if (data?.sources && Array.isArray(data.sources) && data.sources.length > 0) {
     return {
       headers: data.headers || {
@@ -128,7 +231,7 @@ export async function getConsumetEpisodeStream(
     };
   }
 
-  // High-reliability cinematic fallback HLS stream
+  // Reliable HLS fallback stream for testing and seamless player loading
   return {
     headers: {
       Referer: "https://vidstreaming.io/",
@@ -162,26 +265,26 @@ export async function getConsumetEpisodeStream(
   };
 }
 
-// 4. Helper to map title to best matched Consumet Anime ID
+/**
+ * 4. Match Title to Consumet Anime ID
+ */
 export async function matchConsumetAnimeId(
   title: string,
   englishTitle?: string
 ): Promise<string> {
-  // Direct simple slugification
   const slug = (englishTitle || title)
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
-  // Attempt search on Consumet to find verified ID
   try {
     const results = await searchConsumetAnime(title);
     if (results.length > 0 && results[0]?.id) {
       return results[0].id;
     }
   } catch {
-    // Return fallback slug
+    // fallback to slug
   }
 
   return slug;

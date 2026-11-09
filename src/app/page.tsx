@@ -68,6 +68,26 @@ export default function HomePage() {
               progressSeconds: entry.progressSeconds,
               durationSeconds: entry.durationSeconds || movie.durationMinutes * 60,
             });
+            return;
+          }
+
+          // Check anime episodes
+          const animeMatch = CURATED_ANIME.find((a) =>
+            entry.contentId.startsWith(a.consumetId || "") ||
+            a.episodes?.some((ep) => ep.id === entry.contentId)
+          );
+          if (animeMatch) {
+            const epNum = entry.contentId.match(/episode-(\d+)/i)?.[1] || "1";
+            list.push({
+              id: entry.contentId,
+              title: `${animeMatch.englishTitle || animeMatch.title} (Ep ${epNum})`,
+              subtitle: "Anime Series",
+              thumbnailUrl: animeMatch.backdropUrl,
+              watchUrl: `/anime/watch/${entry.contentId}?malId=${animeMatch.malId}`,
+              progressSeconds: entry.progressSeconds,
+              durationSeconds: entry.durationSeconds || 1440,
+            });
+            return;
           }
         }
       });
