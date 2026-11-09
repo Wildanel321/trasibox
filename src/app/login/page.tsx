@@ -202,10 +202,10 @@ export default function LoginPage() {
         <div className="p-3 rounded-xl bg-[#18181B] border border-white/5 text-[11px] text-zinc-400 text-left space-y-1">
           <p className="font-semibold text-amber-400 flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>Single Admin Guarantee:</span>
+            <span>Hak Akses Terproteksi:</span>
           </p>
           <p className="text-[10px] leading-relaxed text-zinc-400">
-            Akun Google pertama yang berhasil login akan otomatis ditetapkan sebagai <strong>1 dan hanya 1 Admin</strong> pengelola platform. Seluruh akun setelahnya adalah pengguna biasa.
+            Hanya email administrator resmi yang dapat mengakses panel admin. Seluruh akun lainnya secara otomatis berstatus pengguna dengan hak akses penuh ke seluruh konten film & serial.
           </p>
         </div>
       </div>

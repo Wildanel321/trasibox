@@ -38,32 +38,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper to determine role based on the "First Google / Registered login is the 1 and only Admin"
+  // Strict Role Resolver: ONLY the exact email defined in NEXT_PUBLIC_ADMIN_EMAIL is granted ADMIN
   const resolveRole = (email: string | null): "ADMIN" | "USER" => {
     if (!email) return "USER";
+    const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").trim().toLowerCase();
 
-    try {
-      const existingAdmin = localStorage.getItem(ADMIN_STORAGE_KEY);
-      if (!existingAdmin) {
-        // FIRST USER BECOMES THE SINGLE SUPER-ADMIN
-        localStorage.setItem(ADMIN_STORAGE_KEY, email.toLowerCase());
-        return "ADMIN";
-      }
-
-      if (existingAdmin.toLowerCase() === email.toLowerCase()) {
-        return "ADMIN";
-      }
-
-      // Check if admin email is also specified via env variable
-      const envAdmin = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-      if (envAdmin && envAdmin.toLowerCase() === email.toLowerCase()) {
-        return "ADMIN";
-      }
-
-      return "USER";
-    } catch {
-      return "USER";
+    // Strict match against designated single admin email
+    if (adminEmail && email.trim().toLowerCase() === adminEmail) {
+      return "ADMIN";
     }
+
+    return "USER";
   };
 
   useEffect(() => {
