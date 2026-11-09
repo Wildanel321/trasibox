@@ -87,6 +87,7 @@ export default function AnimeDetailPage({
 
   if (!anime) {
     notFound();
+    return null;
   }
 
   const episodes = anime.episodes || [];

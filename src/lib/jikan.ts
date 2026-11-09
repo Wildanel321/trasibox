@@ -302,7 +302,7 @@ function formatAniListMedia(media: any): AnimeItem {
 }
 
 // Fetch with strict timeout helper
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 2500): Promise<Response> {
+async function fetchWithTimeout(url: string, options: any = {}, timeoutMs = 2500): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -462,7 +462,7 @@ export async function getTopAnime(page = 1, limit = 24): Promise<AnimeItem[]> {
   try {
     const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/top/anime?page=${page}&limit=${limit}`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 3600 } as any,
     }, 2000);
 
     if (res.ok) {
@@ -490,7 +490,7 @@ export async function getSeasonalAnime(page = 1, limit = 24): Promise<AnimeItem[
   try {
     const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/seasons/now?page=${page}&limit=${limit}`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 3600 } as any,
     }, 2000);
 
     if (res.ok) {
@@ -523,7 +523,7 @@ export async function searchAnimeJikan(query: string, page = 1, limit = 24): Pro
     const encoded = encodeURIComponent(query.trim());
     const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/anime?q=${encoded}&page=${page}&limit=${limit}&order_by=popularity`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 3600 } as any,
     }, 2000);
 
     if (res.ok) {
@@ -625,7 +625,7 @@ export async function getAnimeById(malId: string | number): Promise<AnimeItem | 
   try {
     const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/anime/${idStr}/full`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 3600 } as any,
     }, 2000);
 
     if (res.ok) {
