@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { History, Trash2 } from "lucide-react";
 import { SAMPLE_MOVIES, SAMPLE_SERIES } from "@/lib/data";
+import { CURATED_ANIME } from "@/lib/jikan";
 import { ContinueWatchingCard } from "@/components/cards/ContinueWatchingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -40,6 +41,47 @@ export default function HistoryPage() {
             durationSeconds: entry.durationSeconds || movie.durationMinutes * 60,
             updatedAt: entry.updatedAt || new Date().toISOString(),
           });
+          return;
+        }
+
+        // Check anime episodes
+        const animeMatch = CURATED_ANIME.find((a) =>
+          entry.contentId.startsWith(a.consumetId || "") ||
+          a.episodes?.some((ep) => ep.id === entry.contentId)
+        );
+        if (animeMatch) {
+          const epNum = entry.contentId.match(/episode-(\d+)/i)?.[1] || "1";
+          list.push({
+            id: entry.contentId,
+            title: `${animeMatch.englishTitle || animeMatch.title} (Ep ${epNum})`,
+            subtitle: "Anime Series",
+            thumbnailUrl: animeMatch.backdropUrl,
+            watchUrl: `/anime/watch/${entry.contentId}?malId=${animeMatch.malId}`,
+            progressSeconds: entry.progressSeconds,
+            durationSeconds: entry.durationSeconds || 1440,
+            updatedAt: entry.updatedAt || new Date().toISOString(),
+          });
+          return;
+        }
+
+        // Check TV series
+        for (const s of SAMPLE_SERIES) {
+          for (const season of s.seasons) {
+            const ep = season.episodes.find((e) => e.id === entry.contentId);
+            if (ep) {
+              list.push({
+                id: ep.id,
+                title: `${s.title} (Ep ${ep.episodeNumber})`,
+                subtitle: "Serial TV",
+                thumbnailUrl: ep.thumbnailUrl,
+                watchUrl: `/watch/${ep.id}`,
+                progressSeconds: entry.progressSeconds,
+                durationSeconds: entry.durationSeconds || ep.durationMinutes * 60,
+                updatedAt: entry.updatedAt || new Date().toISOString(),
+              });
+              return;
+            }
+          }
         }
       });
 
