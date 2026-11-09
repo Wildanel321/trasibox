@@ -66,3 +66,4 @@ export function SeriesCard({ series, priority = false }: SeriesCardProps) {
     </div>
   );
 }
+

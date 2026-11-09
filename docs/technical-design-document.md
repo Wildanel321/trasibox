@@ -16,3 +16,4 @@
 - Role: `USER` dan `ADMIN`.
 - Admin route (`/admin/*`) dilindungi oleh middleware verifikasi role.
 - User session disimpan secara secure dengan cookie token / Supabase auth integration.
+

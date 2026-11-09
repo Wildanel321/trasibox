@@ -128,3 +128,4 @@ export interface RightsRecord {
   verifiedBy?: string;
   createdAt: string;
 }
+

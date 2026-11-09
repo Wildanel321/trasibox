@@ -67,3 +67,4 @@ export function StatusBadge({ status }: { status: "DRAFT" | "IN_REVIEW" | "PUBLI
     </span>
   );
 }
+

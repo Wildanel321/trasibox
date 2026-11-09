@@ -23,3 +23,4 @@ Spesifikasi ini mendefinisikan kebutuhan fungsional dan non-fungsional dari plat
 - **NFR-02 (Accessibility):** Mematuhi standar WCAG 2.2 AA dengan rasio kontras memadai pada tema gelap, navigasi keyboard penuh, dan ARIA labels.
 - **NFR-03 (Responsiveness):** Menyesuaikan secara presisi dari resolusi 360px mobile hingga 1920px widescreen tanpa horizontal overflow.
 - **NFR-04 (Data Integrity):** Skema data Prisma yang terdefinisi ketat dengan relasi referensial aman.
+

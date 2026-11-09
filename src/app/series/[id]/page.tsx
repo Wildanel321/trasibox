@@ -189,3 +189,4 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ id: str
     </div>
   );
 }
+

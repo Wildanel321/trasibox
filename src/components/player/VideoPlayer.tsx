@@ -642,3 +642,4 @@ export function VideoPlayer({
     </div>
   );
 }
+

@@ -32,3 +32,4 @@ trasibox/
 3. Generate Prisma client & sync schema: `npx prisma db push` / `npx prisma generate`
 4. Seed mock & verified public-domain films: `npm run seed`
 5. Run dev server: `npm run dev`
+

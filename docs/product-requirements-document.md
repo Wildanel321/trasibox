@@ -18,3 +18,4 @@ TREASIBOX menghadirkan pengalaman menonton film dan serial layaknya bioskop ruma
 - **Metrics Dashboard:** Total judul film/serial, rasio publikasi, utilisasi penyimpanan, dan status pemrosesan.
 - **Rights & Compliance Gateway:** Sistem pengawasan legalitas lisensi film (Public Domain, Creative Commons, Direct License) sebelum disiarkan ke publik.
 - **TMDB Metadata Importer:** Akselerator pengisian informasi film secara terstandardisasi.
+

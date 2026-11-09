@@ -34,3 +34,4 @@ Menggunakan Tailwind CSS v4 dengan variabel custom:
 
 ## 3. Streaming & Player Architecture
 Player dibangun menggunakan HLS.js dengan fallback native HTML5 video untuk kompatibilitas Safari/iOS. Player menyimpan state playback (detik pemutaran) secara debounced ke `/api/v1/watch/progress` setiap 5 detik dan saat pause/leave.
+

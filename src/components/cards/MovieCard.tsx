@@ -99,3 +99,4 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
     </div>
   );
 }
+

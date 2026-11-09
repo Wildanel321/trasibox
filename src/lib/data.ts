@@ -392,3 +392,4 @@ export const INITIAL_RIGHTS_RECORDS: RightsRecord[] = [
     createdAt: "2026-11-09T07:00:00Z",
   },
 ];
+

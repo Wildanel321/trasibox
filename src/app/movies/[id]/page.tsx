@@ -213,3 +213,4 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
     </div>
   );
 }
+
