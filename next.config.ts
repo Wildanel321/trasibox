@@ -15,6 +15,26 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.myanimelist.net",
+      },
+      {
+        protocol: "https",
+        hostname: "gogocdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.gogocdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "s4.anilist.co",
+      },
+      {
+        protocol: "https",
+        hostname: "artworks.thetvdb.com",
+      },
     ],
   },
   turbopack: {

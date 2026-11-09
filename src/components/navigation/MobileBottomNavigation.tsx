@@ -3,23 +3,23 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Film, Bookmark, History, User } from "lucide-react";
+import { Home, Film, Bookmark, History, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileBottomNavigation() {
   const pathname = usePathname();
 
   // Don't show inside admin or video playback fullscreen
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/watch")) {
+  if (pathname?.startsWith("/admin") || pathname?.includes("/watch")) {
     return null;
   }
 
   const items = [
     { label: "Home", href: "/", icon: Home },
     { label: "Movies", href: "/movies", icon: Film },
+    { label: "Anime", href: "/anime", icon: Sparkles },
     { label: "My List", href: "/my-list", icon: Bookmark },
     { label: "History", href: "/history", icon: History },
-    { label: "Profile", href: "/login", icon: User },
   ];
 
   return (

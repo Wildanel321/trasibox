@@ -129,3 +129,52 @@ export interface RightsRecord {
   createdAt: string;
 }
 
+export interface AnimeEpisode {
+  id: string;
+  episodeNumber: number;
+  title: string;
+  url?: string;
+  isFiller?: boolean;
+}
+
+export interface AnimeSource {
+  url: string;
+  isM3U8: boolean;
+  quality: string;
+}
+
+export interface AnimeStreamData {
+  headers?: {
+    Referer?: string;
+    [key: string]: string | undefined;
+  };
+  sources: AnimeSource[];
+  download?: string;
+  subtitles?: { id: string; label: string; lang: string; src: string }[];
+}
+
+export interface AnimeItem {
+  id: string;
+  malId: number;
+  consumetId?: string;
+  title: string;
+  englishTitle?: string;
+  japaneseTitle?: string;
+  synopsis: string;
+  episodesCount: number | null;
+  score: number;
+  rank?: number;
+  popularity?: number;
+  status: string;
+  season?: string;
+  year?: number;
+  posterUrl: string;
+  backdropUrl: string;
+  trailerYoutubeId?: string;
+  genres: string[];
+  studios: string[];
+  type?: string;
+  episodes?: AnimeEpisode[];
+}
+
+

@@ -29,6 +29,7 @@ export function Navbar() {
     { label: "Home", href: "/" },
     { label: "Movies", href: "/movies" },
     { label: "TV Series", href: "/series" },
+    { label: "Anime", href: "/anime" },
     { label: "My List", href: "/my-list" },
     { label: "History", href: "/history" },
   ];

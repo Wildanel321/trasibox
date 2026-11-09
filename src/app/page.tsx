@@ -6,9 +6,11 @@ import { FeaturedHero } from "@/components/home/FeaturedHero";
 import { ContentCarousel } from "@/components/home/ContentCarousel";
 import { MovieCard } from "@/components/cards/MovieCard";
 import { SeriesCard } from "@/components/cards/SeriesCard";
+import { AnimeCard } from "@/components/cards/AnimeCard";
 import { ContinueWatchingCard } from "@/components/cards/ContinueWatchingCard";
 import { SAMPLE_MOVIES, SAMPLE_SERIES, GENRES } from "@/lib/data";
-import { Movie, Series } from "@/lib/types";
+import { Movie, Series, AnimeItem } from "@/lib/types";
+import { CURATED_ANIME } from "@/lib/jikan";
 import { Sparkles, Compass } from "lucide-react";
 
 interface SavedHistoryEntry {
@@ -138,6 +140,15 @@ export default function HomePage() {
           {popularSeries.map((series) => (
             <div key={series.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
               <SeriesCard series={series} />
+            </div>
+          ))}
+        </ContentCarousel>
+
+        {/* 4.5. Trending Anime (Jikan MAL & Consumet) */}
+        <ContentCarousel title="Anime Terpopuler" seeAllHref="/anime">
+          {CURATED_ANIME.map((anime) => (
+            <div key={anime.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
+              <AnimeCard anime={anime} />
             </div>
           ))}
         </ContentCarousel>

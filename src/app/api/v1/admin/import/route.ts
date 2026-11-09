@@ -1,9 +1,73 @@
 import { NextResponse } from "next/server";
+import { getAnimeById, searchAnimeJikan } from "@/lib/jikan";
+import { getConsumetAnimeInfo, matchConsumetAnimeId } from "@/lib/consumet";
 
 export async function POST(request: Request) {
   try {
-    const { tmdbId, type = "movie" } = await request.json();
+    const { tmdbId, query, type = "movie", provider = "tmdb" } = await request.json();
 
+    // 1. Anime Ingest via Jikan & Consumet
+    if (provider === "jikan" || provider === "consumet" || type === "anime") {
+      const idOrQuery = String(tmdbId || query || "").trim();
+
+      if (!idOrQuery) {
+        return NextResponse.json(
+          { success: false, error: "MAL ID atau Judul Anime wajib diisi." },
+          { status: 400 }
+        );
+      }
+
+      // If purely numeric, treat as MAL ID; else search by title
+      const isNumeric = /^\d+$/.test(idOrQuery);
+      let animeData = null;
+
+      if (isNumeric) {
+        animeData = await getAnimeById(idOrQuery);
+      } else {
+        const results = await searchAnimeJikan(idOrQuery, 1, 1);
+        if (results.length > 0) {
+          animeData = results[0];
+        }
+      }
+
+      if (!animeData) {
+        return NextResponse.json(
+          { success: false, error: `Anime "${idOrQuery}" tidak ditemukan di database Jikan v4.` },
+          { status: 404 }
+        );
+      }
+
+      // Check Consumet stream mapping
+      const consumetId =
+        animeData.consumetId ||
+        (await matchConsumetAnimeId(animeData.title, animeData.englishTitle));
+      const consumetInfo = await getConsumetAnimeInfo(consumetId);
+
+      return NextResponse.json({
+        success: true,
+        source: "jikan-mal-and-consumet",
+        message: "Metadata anime berhasil ditarik dari Jikan v4 dan dipetakan ke Consumet.",
+        data: {
+          malId: animeData.malId,
+          consumetId,
+          title: animeData.title,
+          englishTitle: animeData.englishTitle,
+          japaneseTitle: animeData.japaneseTitle,
+          releaseYear: animeData.year || 2024,
+          durationMinutes: 24,
+          rating: animeData.score,
+          synopsis: animeData.synopsis,
+          posterUrl: animeData.posterUrl,
+          backdropUrl: animeData.backdropUrl,
+          genres: animeData.genres,
+          directors: animeData.studios,
+          totalEpisodes: animeData.episodesCount || consumetInfo?.totalEpisodes || 12,
+          episodesAvailable: consumetInfo?.episodes?.length || animeData.episodes?.length || 12,
+        },
+      });
+    }
+
+    // 2. TMDB Ingest (Movies / TV Series)
     if (!tmdbId) {
       return NextResponse.json(
         { success: false, error: "TMDB ID wajib diisi." },
@@ -122,7 +186,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: "Gagal mengimpor metadata dari TMDB." },
+      { success: false, error: "Gagal mengimpor metadata." },
       { status: 500 }
     );
   }

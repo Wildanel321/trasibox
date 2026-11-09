@@ -5,13 +5,18 @@ import { Search, Film, Tv, Clock, X, Sparkles } from "lucide-react";
 import { SAMPLE_MOVIES, SAMPLE_SERIES } from "@/lib/data";
 import { MovieCard } from "@/components/cards/MovieCard";
 import { SeriesCard } from "@/components/cards/SeriesCard";
+import { AnimeCard } from "@/components/cards/AnimeCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { AnimeItem } from "@/lib/types";
+import { CURATED_ANIME } from "@/lib/jikan";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "MOVIES" | "SERIES">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "MOVIES" | "SERIES" | "ANIME">("ALL");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [animeResults, setAnimeResults] = useState<AnimeItem[]>([]);
+  const [isSearchingAnime, setIsSearchingAnime] = useState(false);
 
   // Debounce query
   useEffect(() => {
@@ -38,6 +43,45 @@ export default function SearchPage() {
       setRecentSearches(stored);
     } catch {}
   }, []);
+
+  // Search Anime using Jikan / fallback API
+  useEffect(() => {
+    if (!debouncedQuery.trim()) {
+      setAnimeResults([]);
+      return;
+    }
+
+    let isMounted = true;
+    setIsSearchingAnime(true);
+
+    fetch(`/api/v1/anime?q=${encodeURIComponent(debouncedQuery.trim())}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (isMounted && json.success && Array.isArray(json.data)) {
+          setAnimeResults(json.data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          const q = debouncedQuery.toLowerCase();
+          setAnimeResults(
+            CURATED_ANIME.filter(
+              (a) =>
+                a.title.toLowerCase().includes(q) ||
+                (a.englishTitle && a.englishTitle.toLowerCase().includes(q)) ||
+                a.genres.some((g) => g.toLowerCase().includes(q))
+            )
+          );
+        }
+      })
+      .finally(() => {
+        if (isMounted) setIsSearchingAnime(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedQuery]);
 
   const removeRecent = (term: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,8 +114,9 @@ export default function SearchPage() {
   }, [debouncedQuery]);
 
   const totalResults =
-    (filterType === "SERIES" ? 0 : results.movies.length) +
-    (filterType === "MOVIES" ? 0 : results.series.length);
+    (filterType === "SERIES" || filterType === "ANIME" ? 0 : results.movies.length) +
+    (filterType === "MOVIES" || filterType === "ANIME" ? 0 : results.series.length) +
+    (filterType === "MOVIES" || filterType === "SERIES" ? 0 : animeResults.length);
 
   return (
     <div className="min-h-screen bg-[#09090B] pt-28 pb-20">
@@ -82,7 +127,7 @@ export default function SearchPage() {
             Pencarian Cerdas
           </h1>
           <p className="text-sm text-[#A1A1AA]">
-            Temukan film layar lebar, serial TV, sutradara, atau genre favorit Anda.
+            Temukan film layar lebar, serial TV, dan anime favorit dari database TMDB & Jikan v4.
           </p>
 
           <div className="relative">
@@ -92,7 +137,7 @@ export default function SearchPage() {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ketik judul, aktor, atau genre (cth: Sci-Fi, Tears of Steel, Sintel)..."
+              placeholder="Ketik judul film, serial, atau anime (cth: Frieren, Solo Leveling, Sintel)..."
               className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-[#18181B] border border-white/10 text-base text-white placeholder-[#71717A] focus:outline-none focus:border-[#7C5CFC] shadow-xl shadow-black/50 transition-all"
             />
             {query && (
@@ -133,8 +178,8 @@ export default function SearchPage() {
         {/* Filter Type Tabs */}
         {debouncedQuery && (
           <div className="flex items-center justify-between border-b border-white/8 pb-4">
-            <div className="flex items-center gap-2">
-              {(["ALL", "MOVIES", "SERIES"] as const).map((t) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {(["ALL", "MOVIES", "SERIES", "ANIME"] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -145,7 +190,13 @@ export default function SearchPage() {
                       : "bg-[#18181B] text-[#A1A1AA] hover:text-white"
                   }`}
                 >
-                  {t === "ALL" ? "Semua Hasil" : t === "MOVIES" ? "Hanya Film" : "Hanya Serial"}
+                  {t === "ALL"
+                    ? "Semua Hasil"
+                    : t === "MOVIES"
+                    ? "Hanya Film"
+                    : t === "SERIES"
+                    ? "Hanya Serial"
+                    : "Hanya Anime"}
                 </button>
               ))}
             </div>
@@ -160,6 +211,26 @@ export default function SearchPage() {
         {debouncedQuery ? (
           totalResults > 0 ? (
             <div className="space-y-10">
+              {/* Anime Results */}
+              {(filterType === "ALL" || filterType === "ANIME") && animeResults.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-[#7C5CFC]" />
+                      <span>Anime ({animeResults.length})</span>
+                    </h3>
+                    <span className="text-[11px] text-zinc-400">
+                      Didukung Jikan (MAL) & Consumet
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+                    {animeResults.map((a) => (
+                      <AnimeCard key={a.id} anime={a} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Movies Results */}
               {(filterType === "ALL" || filterType === "MOVIES") && results.movies.length > 0 && (
                 <div className="space-y-4">
@@ -193,7 +264,7 @@ export default function SearchPage() {
           ) : (
             <EmptyState
               title={`Tidak ada hasil untuk "${debouncedQuery}"`}
-              description="Periksa kembali ejaan kata kunci Anda atau coba cari berdasarkan genre seperti Sci-Fi atau Animation."
+              description="Periksa kembali ejaan kata kunci Anda atau coba cari anime seperti Frieren atau Solo Leveling."
               actionLabel="Hapus Kata Kunci"
               onAction={() => setQuery("")}
             />
@@ -202,7 +273,7 @@ export default function SearchPage() {
           <div className="pt-10 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#111114] border border-white/5 text-xs text-zinc-400">
               <Sparkles className="w-4 h-4 text-[#7C5CFC]" />
-              <span>Coba cari: Tears of Steel, Sintel, Big Buck Bunny, Elephants Dream</span>
+              <span>Coba cari: Frieren, Solo Leveling, Jujutsu Kaisen, Sintel, Tears of Steel</span>
             </div>
           </div>
         )}
@@ -210,4 +281,3 @@ export default function SearchPage() {
     </div>
   );
 }
-
