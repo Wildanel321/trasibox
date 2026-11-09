@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ExternalLink,
   Search,
+  Bookmark,
+  Check,
 } from "lucide-react";
 import { AnimeItem, AnimeEpisode } from "@/lib/types";
 import { CURATED_ANIME } from "@/lib/jikan";
@@ -36,6 +38,30 @@ export default function AnimeDetailPage({
   const [isLoading, setIsLoading] = useState(!anime);
   const [episodeFilter, setEpisodeFilter] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("trasibox_watchlist") || "[]");
+      setIsBookmarked(stored.includes(id) || (anime ? stored.includes(String(anime.malId)) : false));
+    } catch {}
+  }, [id, anime]);
+
+  const toggleBookmark = () => {
+    try {
+      const stored: string[] = JSON.parse(localStorage.getItem("trasibox_watchlist") || "[]");
+      const targetId = String(anime?.malId || id);
+      let updated: string[];
+      if (stored.includes(targetId) || stored.includes(id)) {
+        updated = stored.filter((item) => item !== targetId && item !== id);
+        setIsBookmarked(false);
+      } else {
+        updated = [...stored, targetId];
+        setIsBookmarked(true);
+      }
+      localStorage.setItem("trasibox_watchlist", JSON.stringify(updated));
+    } catch {}
+  };
 
   useEffect(() => {
     fetch(`/api/v1/anime/${id}`)
