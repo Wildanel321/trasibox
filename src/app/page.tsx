@@ -1,69 +1,195 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { FeaturedHero } from "@/components/home/FeaturedHero";
+import { ContentCarousel } from "@/components/home/ContentCarousel";
+import { MovieCard } from "@/components/cards/MovieCard";
+import { SeriesCard } from "@/components/cards/SeriesCard";
+import { ContinueWatchingCard } from "@/components/cards/ContinueWatchingCard";
+import { SAMPLE_MOVIES, SAMPLE_SERIES, GENRES } from "@/lib/data";
+import { Movie, Series } from "@/lib/types";
+import { Sparkles, Compass } from "lucide-react";
+
+interface SavedHistoryEntry {
+  contentId: string;
+  contentType: "MOVIE" | "EPISODE";
+  progressSeconds: number;
+  durationSeconds: number;
+  completed: boolean;
+  updatedAt: string;
+}
+
+export default function HomePage() {
+  const [continueWatchingList, setContinueWatchingList] = useState<
+    {
+      id: string;
+      title: string;
+      subtitle: string;
+      thumbnailUrl: string;
+      watchUrl: string;
+      progressSeconds: number;
+      durationSeconds: number;
+    }[]
+  >([]);
+
+  // Featured premiere
+  const heroMovie = SAMPLE_MOVIES[0]; // Tears of Steel
+
+  // Trending Movies
+  const trendingMovies = [...SAMPLE_MOVIES].sort((a, b) => b.viewCount - a.viewCount);
+
+  // Popular Series
+  const popularSeries = [...SAMPLE_SERIES];
+
+  // Recently Added
+  const recentlyAdded = [...SAMPLE_MOVIES].sort((a, b) => b.releaseYear - a.releaseYear);
+
+  // Recommended for You (Curated high-rated titles)
+  const recommendedMovies = [...SAMPLE_MOVIES].filter((m) => m.rating >= 8.5);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("trasibox_history") || "{}");
+      const list: typeof continueWatchingList = [];
+
+      Object.values(stored).forEach((entry: any) => {
+        if (!entry.completed && entry.progressSeconds > 10) {
+          const movie = SAMPLE_MOVIES.find((m) => m.id === entry.contentId);
+          if (movie) {
+            list.push({
+              id: movie.id,
+              title: movie.title,
+              subtitle: "Film",
+              thumbnailUrl: movie.backdropUrl,
+              watchUrl: `/watch/${movie.id}`,
+              progressSeconds: entry.progressSeconds,
+              durationSeconds: entry.durationSeconds || movie.durationMinutes * 60,
+            });
+          }
+        }
+      });
+
+      // Default mock continue watching item if history is fresh
+      if (list.length === 0) {
+        list.push({
+          id: "mov-sintel",
+          title: "Sintel",
+          subtitle: "15m • Fantasi",
+          thumbnailUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80",
+          watchUrl: "/watch/mov-sintel",
+          progressSeconds: 320,
+          durationSeconds: 900,
+        });
+      }
+
+      setContinueWatchingList(list);
+    } catch {
+      // localStorage fallback
+    }
+  }, []);
+
+  const removeHistoryItem = (id: string) => {
+    setContinueWatchingList((prev) => prev.filter((item) => item.id !== id));
+    try {
+      const stored = JSON.parse(localStorage.getItem("trasibox_history") || "{}");
+      delete stored[id];
+      localStorage.setItem("trasibox_history", JSON.stringify(stored));
+    } catch {}
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-[#09090B] pb-12">
+      {/* 1. Cinematic Hero Section */}
+      <FeaturedHero movie={heroMovie} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10 relative z-20 space-y-12">
+        {/* 2. Continue Watching (if exists) */}
+        {continueWatchingList.length > 0 && (
+          <ContentCarousel title="Lanjutkan Menonton" seeAllHref="/history">
+            {continueWatchingList.map((item) => (
+              <div key={item.id} className="w-[260px] sm:w-[320px] flex-shrink-0">
+                <ContinueWatchingCard
+                  id={item.id}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  thumbnailUrl={item.thumbnailUrl}
+                  watchUrl={item.watchUrl}
+                  progressSeconds={item.progressSeconds}
+                  durationSeconds={item.durationSeconds}
+                  onRemove={() => removeHistoryItem(item.id)}
+                />
+              </div>
+            ))}
+          </ContentCarousel>
+        )}
+
+        {/* 3. Trending Movies */}
+        <ContentCarousel title="Trending Sekarang" seeAllHref="/movies">
+          {trendingMovies.map((movie, idx) => (
+            <div key={movie.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
+              <MovieCard movie={movie} priority={idx < 4} />
+            </div>
+          ))}
+        </ContentCarousel>
+
+        {/* 4. Popular TV Series */}
+        <ContentCarousel title="Serial TV Pilihan" seeAllHref="/series">
+          {popularSeries.map((series) => (
+            <div key={series.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
+              <SeriesCard series={series} />
+            </div>
+          ))}
+        </ContentCarousel>
+
+        {/* 5. Recommended For You */}
+        <ContentCarousel title="Rekomendasi Terbaik" seeAllHref="/movies?sort=rating">
+          {recommendedMovies.map((movie) => (
+            <div key={movie.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </ContentCarousel>
+
+        {/* 6. Genre Collections */}
+        <section className="space-y-4 pt-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              <Compass className="w-5 h-5 text-[#7C5CFC]" />
+              <span>Jelajahi Genre</span>
+            </h2>
+            <Link
+              href="/movies"
+              className="text-xs sm:text-sm font-medium text-[#7C5CFC] hover:text-[#A78BFA] transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              Semua Genre
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {GENRES.map((g) => (
+              <Link
+                key={g.id}
+                href={`/movies?genre=${g.slug}`}
+                className="group p-4 rounded-xl bg-[#111114] hover:bg-[#18181B] border border-white/5 hover:border-[#7C5CFC]/40 text-center transition-all duration-200"
+              >
+                <div className="text-sm font-semibold text-[#FAFAFA] group-hover:text-[#A78BFA] transition-colors">
+                  {g.name}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. Recently Added */}
+        <ContentCarousel title="Baru Ditambahkan" seeAllHref="/movies?sort=year">
+          {recentlyAdded.map((movie) => (
+            <div key={movie.id} className="w-[150px] sm:w-[185px] lg:w-[210px] flex-shrink-0">
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </ContentCarousel>
+      </div>
     </div>
   );
 }

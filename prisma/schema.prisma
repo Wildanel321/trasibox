@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum RightsStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LicenseType {
+  PUBLIC_DOMAIN
+  CREATIVE_COMMONS
+  DIRECT_DISTRIBUTOR
+  OPEN_CINEMA
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String
+  passwordHash String
+  role         Role           @default(USER)
+  avatarUrl    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  watchlist    Watchlist[]
+  history      WatchHistory[]
+  reviewsDone  RightsRecord[] @relation("AdminVerifier")
+}
+
+model Genre {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  slug         String        @unique
+  movieGenres  MovieGenre[]
+  seriesGenres SeriesGenre[]
+}
+
+model Movie {
+  id              String         @id @default(uuid())
+  title           String
+  originalTitle   String?
+  slug            String         @unique
+  synopsis        String
+  releaseYear     Int
+  durationMinutes Int
+  posterUrl       String
+  backdropUrl     String
+  rating          Float          @default(0.0)
+  viewCount       Int            @default(0)
+  status          ContentStatus  @default(DRAFT)
+  rightsVerified  Boolean        @default(false)
+  hlsStreamUrl    String
+  genres          MovieGenre[]
+  watchlistItems  Watchlist[]
+  historyItems    WatchHistory[]
+  rightsRecords   RightsRecord[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model MovieGenre {
+  id      String @id @default(uuid())
+  movieId String
+  genreId String
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, genreId])
+}
+
+model Series {
+  id             String        @id @default(uuid())
+  title          String
+  originalTitle  String?
+  slug           String        @unique
+  synopsis       String
+  firstAirYear   Int
+  posterUrl      String
+  backdropUrl    String
+  rating         Float         @default(0.0)
+  status         ContentStatus @default(DRAFT)
+  rightsVerified Boolean       @default(false)
+  seasons        Season[]
+  genres         SeriesGenre[]
+  watchlistItems Watchlist[]
+  rightsRecords  RightsRecord[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model SeriesGenre {
+  id       String @id @default(uuid())
+  seriesId String
+  genreId  String
+  series   Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  genre    Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@unique([seriesId, genreId])
+}
+
+model Season {
+  id           String    @id @default(uuid())
+  seriesId     String
+  seasonNumber Int
+  title        String
+  synopsis     String?
+  posterUrl    String?
+  series       Series    @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  episodes     Episode[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([seriesId, seasonNumber])
+}
+
+model Episode {
+  id              String         @id @default(uuid())
+  seasonId        String
+  episodeNumber   Int
+  title           String
+  synopsis        String?
+  durationMinutes Int
+  thumbnailUrl    String
+  hlsStreamUrl    String
+  season          Season         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  historyItems    WatchHistory[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([seasonId, episodeNumber])
+}
+
+model Watchlist {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String?
+  seriesId  String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  series    Series?  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, movieId])
+  @@unique([userId, seriesId])
+}
+
+model WatchHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  movieId         String?
+  episodeId       String?
+  progressSeconds Int      @default(0)
+  durationSeconds Int      @default(0)
+  completed       Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie           Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episode         Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+  @@unique([userId, episodeId])
+}
+
+model ProcessingJob {
+  id              String    @id @default(uuid())
+  sourceFileName  String
+  targetFormat    String    @default("HLS / ABR")
+  status          JobStatus @default(QUEUED)
+  progress        Int       @default(0)
+  durationSeconds Int       @default(0)
+  fileSizeMb      Float     @default(0.0)
+  errorMessage    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model RightsRecord {
+  id               String       @id @default(uuid())
+  contentTitle     String
+  contentType      String // "MOVIE" | "SERIES"
+  movieId          String?
+  seriesId         String?
+  distributorName  String
+  licenseType      LicenseType  @default(PUBLIC_DOMAIN)
+  proofDocumentUrl String
+  expiryDate       DateTime?
+  status           RightsStatus @default(PENDING)
+  notes            String?
+  verifiedByUserId String?
+  movie            Movie?       @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  series           Series?      @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  verifiedByUser   User?        @relation("AdminVerifier", fields: [verifiedByUserId], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
