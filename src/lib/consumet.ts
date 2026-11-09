@@ -1,4 +1,4 @@
-import { AnimeEpisode, AnimeStreamData } from "./types";
+import type { AnimeEpisode, AnimeStreamData } from "./types";
 
 // Supported Consumet base endpoints (used only if direct @consumet/extensions library is unavailable)
 const PRIMARY_CONSUMET_URL =

@@ -35,6 +35,7 @@ export default function AnimeDetailPage({
   });
   const [isLoading, setIsLoading] = useState(!anime);
   const [episodeFilter, setEpisodeFilter] = useState("");
+  const [selectedBatch, setSelectedBatch] = useState(0);
 
   useEffect(() => {
     fetch(`/api/v1/anime/${id}`)
@@ -63,12 +64,15 @@ export default function AnimeDetailPage({
   }
 
   const episodes = anime.episodes || [];
-  const filteredEpisodes = episodeFilter.trim()
+  const BATCH_SIZE = 50;
+  const totalBatches = Math.ceil(episodes.length / BATCH_SIZE);
+
+  const displayEpisodes = episodeFilter.trim()
     ? episodes.filter((ep) =>
         String(ep.episodeNumber).includes(episodeFilter.trim()) ||
         ep.title.toLowerCase().includes(episodeFilter.toLowerCase())
       )
-    : episodes;
+    : episodes.slice(selectedBatch * BATCH_SIZE, (selectedBatch + 1) * BATCH_SIZE);
 
   const firstEpisode = episodes[0];
 
@@ -251,13 +255,38 @@ export default function AnimeDetailPage({
             )}
           </div>
 
-          {filteredEpisodes.length === 0 ? (
+          {/* Batch Tabs if anime has more than 50 episodes */}
+          {totalBatches > 1 && !episodeFilter.trim() && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/5">
+              {Array.from({ length: totalBatches }, (_, bIdx) => {
+                const start = bIdx * BATCH_SIZE + 1;
+                const end = Math.min((bIdx + 1) * BATCH_SIZE, episodes.length);
+                const isActive = selectedBatch === bIdx;
+                return (
+                  <button
+                    key={bIdx}
+                    type="button"
+                    onClick={() => setSelectedBatch(bIdx)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                      isActive
+                        ? "bg-[#7C5CFC] text-white shadow-md shadow-[#7C5CFC]/30"
+                        : "bg-[#18181B] text-zinc-400 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    Ep {start} - {end}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {displayEpisodes.length === 0 ? (
             <div className="p-8 text-center rounded-xl bg-[#111114] border border-white/8 text-zinc-500 text-sm">
               Tidak ada episode yang sesuai.
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-              {filteredEpisodes.map((ep) => (
+              {displayEpisodes.map((ep) => (
                 <Link
                   key={ep.id}
                   href={`/anime/watch/${ep.id}?malId=${anime.malId}`}

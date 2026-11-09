@@ -1,9 +1,64 @@
-import { AnimeItem, AnimeEpisode } from "./types";
+import type { AnimeItem, AnimeEpisode } from "./types";
 
 const JIKAN_BASE_URL = "https://api.jikan.moe/v4";
+const ANILIST_GRAPHQL_URL = "https://graphql.anilist.co";
 
 // High quality curated fallback anime dataset
 export const CURATED_ANIME: AnimeItem[] = [
+  {
+    id: "20",
+    malId: 20,
+    consumetId: "naruto",
+    title: "Naruto",
+    englishTitle: "Naruto",
+    japaneseTitle: "NARUTO -ナルト-",
+    synopsis: "Naruto Uzumaki adalah seorang ninja muda yang hiperaktif dan sering dijauhi oleh penduduk desa Konoha karena di dalam tubuhnya tersegel monster Rubah Ekor Sembilan (Kyuubi). Bertekad untuk diakui oleh semua orang dan melindungi desanya, Naruto berjuang melewati berbagai rintangan untuk meraih cita-citanya menjadi Hokage terhebat.",
+    episodesCount: 220,
+    score: 8.0,
+    rank: 600,
+    popularity: 8,
+    status: "Finished Airing",
+    season: "Fall 2002",
+    year: 2002,
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20-dE6UHbFFg1A5.jpg",
+    backdropUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/20-HHxhPj5JD13a.jpg",
+    trailerYoutubeId: "-G9BqkgZXRA",
+    genres: ["Action", "Adventure", "Fantasy", "Martial Arts"],
+    studios: ["Studio Pierrot"],
+    type: "TV",
+    episodes: Array.from({ length: 220 }, (_, i) => ({
+      id: `naruto-episode-${i + 1}`,
+      episodeNumber: i + 1,
+      title: `Episode ${i + 1}`,
+    })),
+  },
+  {
+    id: "1735",
+    malId: 1735,
+    consumetId: "naruto-shippuuden",
+    title: "Naruto: Shippuuden",
+    englishTitle: "Naruto Shippuden",
+    japaneseTitle: "NARUTO -ナルト- 疾風伝",
+    synopsis: "Setelah dua setengah tahun berlatih intensif bersama Jiraiya, Naruto Uzumaki kembali ke Desa Konoha dalam usia remaja. Namun ancaman besar dari organisasi misterius Akatsuki yang memburu para Jinchuuriki mulai bergerak dan memicu perang dunia ninja terbesar.",
+    episodesCount: 500,
+    score: 8.28,
+    rank: 310,
+    popularity: 15,
+    status: "Finished Airing",
+    season: "Winter 2007",
+    year: 2007,
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1735-F5584iERx2Er.jpg",
+    backdropUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&auto=format&fit=crop&q=80",
+    trailerYoutubeId: "1nydxb4I4nc",
+    genres: ["Action", "Adventure", "Fantasy"],
+    studios: ["Studio Pierrot"],
+    type: "TV",
+    episodes: Array.from({ length: 500 }, (_, i) => ({
+      id: `naruto-shippuuden-episode-${i + 1}`,
+      episodeNumber: i + 1,
+      title: `Episode ${i + 1}`,
+    })),
+  },
   {
     id: "52991",
     malId: 52991,
@@ -86,82 +141,28 @@ export const CURATED_ANIME: AnimeItem[] = [
     })),
   },
   {
-    id: "54234",
-    malId: 54234,
-    consumetId: "kimetsu-no-yaiba-hashira-geiko-hen",
-    title: "Kimetsu no Yaiba: Hashira Geiko-hen",
-    englishTitle: "Demon Slayer: Hashira Training Arc",
-    japaneseTitle: "鬼滅の刃 柱稽古編",
-    synopsis: "Tanjiro dan para pembasmi iblis menjalani latihan fisik dan spiritual intensif di bawah bimbingan para Hashira untuk bersiap menghadapi perang akhir melawan Muzan Kibutsuji dan iblis bulan atas.",
-    episodesCount: 8,
-    score: 8.21,
-    rank: 210,
-    popularity: 95,
+    id: "269",
+    malId: 269,
+    consumetId: "bleach",
+    title: "BLEACH",
+    englishTitle: "Bleach",
+    japaneseTitle: "BLEACH -ブリーチ-",
+    synopsis: "Ichigo Kurosaki adalah seorang siswa SMA yang dapat melihat roh. Ketika keluarganya diserang oleh Hollow, ia mendapatkan kekuatan Shinigami dari Rukia Kuchiki dan memulai perjalanannya melindungi dunia manusia dan Soul Society.",
+    episodesCount: 366,
+    score: 7.92,
+    rank: 650,
+    popularity: 11,
     status: "Finished Airing",
-    season: "Spring 2024",
-    year: 2024,
-    posterUrl: "https://cdn.myanimelist.net/images/anime/1065/141973l.jpg",
-    backdropUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1920&auto=format&fit=crop&q=80",
-    trailerYoutubeId: "c_fI_8mUfBg",
-    genres: ["Action", "Fantasy"],
-    studios: ["ufotable"],
+    season: "Fall 2004",
+    year: 2004,
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx269-eQxRmWvBlnH3.png",
+    backdropUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/269.jpg",
+    trailerYoutubeId: "oZ67d++v4hg",
+    genres: ["Action", "Adventure", "Supernatural"],
+    studios: ["Studio Pierrot"],
     type: "TV",
-    episodes: Array.from({ length: 8 }, (_, i) => ({
-      id: `kimetsu-no-yaiba-hashira-geiko-hen-episode-${i + 1}`,
-      episodeNumber: i + 1,
-      title: `Episode ${i + 1}`,
-    })),
-  },
-  {
-    id: "16498",
-    malId: 16498,
-    consumetId: "shingeki-no-kyojin",
-    title: "Shingeki no Kyojin",
-    englishTitle: "Attack on Titan",
-    japaneseTitle: "進撃の巨人",
-    synopsis: "Setelah dinding raksasa pelindung umat manusia dihancurkan oleh Titan Kolosal, Eren Yeager bersumpah memusnahkan seluruh Titan dari muka bumi setelah menyaksikan ibunya dimangsa di depan matanya.",
-    episodesCount: 25,
-    score: 8.54,
-    rank: 110,
-    popularity: 1,
-    status: "Finished Airing",
-    season: "Spring 2013",
-    year: 2013,
-    posterUrl: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
-    backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1920&auto=format&fit=crop&q=80",
-    trailerYoutubeId: "LHtdKWJgev4",
-    genres: ["Action", "Drama", "Suspense"],
-    studios: ["Wit Studio"],
-    type: "TV",
-    episodes: Array.from({ length: 25 }, (_, i) => ({
-      id: `shingeki-no-kyojin-episode-${i + 1}`,
-      episodeNumber: i + 1,
-      title: `Episode ${i + 1}`,
-    })),
-  },
-  {
-    id: "50265",
-    malId: 50265,
-    consumetId: "spy-x-family",
-    title: "Spy x Family",
-    englishTitle: "SPY x FAMILY",
-    japaneseTitle: "SPY×FAMILY",
-    synopsis: "Demi menjaga perdamaian antara Westalis dan Ostania, mata-mata nomor satu bersandi 'Twilight' harus membangun keluarga samaran dalam Operasi Strix. Tanpa ia sadari, istri yang ia pilih adalah pembunuh bayaran ulung, dan anak adopsinya adalah cenayang pembaca pikiran.",
-    episodesCount: 12,
-    score: 8.48,
-    rank: 130,
-    popularity: 38,
-    status: "Finished Airing",
-    season: "Spring 2022",
-    year: 2022,
-    posterUrl: "https://cdn.myanimelist.net/images/anime/1441/122795l.jpg",
-    backdropUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1920&auto=format&fit=crop&q=80",
-    trailerYoutubeId: "ofXigq9aIpo",
-    genres: ["Action", "Comedy"],
-    studios: ["Wit Studio", "CloverWorks"],
-    type: "TV",
-    episodes: Array.from({ length: 12 }, (_, i) => ({
-      id: `spy-x-family-episode-${i + 1}`,
+    episodes: Array.from({ length: 366 }, (_, i) => ({
+      id: `bleach-episode-${i + 1}`,
       episodeNumber: i + 1,
       title: `Episode ${i + 1}`,
     })),
@@ -187,27 +188,28 @@ export const CURATED_ANIME: AnimeItem[] = [
     genres: ["Action", "Adventure", "Fantasy"],
     studios: ["Toei Animation"],
     type: "TV",
-    episodes: Array.from({ length: 50 }, (_, i) => ({
-      id: `one-piece-episode-${1070 + i}`,
-      episodeNumber: 1070 + i,
-      title: `Episode ${1070 + i}`,
+    episodes: Array.from({ length: 1100 }, (_, i) => ({
+      id: `one-piece-episode-${i + 1}`,
+      episodeNumber: i + 1,
+      title: `Episode ${i + 1}`,
     })),
   },
 ];
 
-// Map Jikan raw response to clean AnimeItem
+// Helper to format Jikan raw response to clean AnimeItem
 export function formatJikanAnime(item: any): AnimeItem {
   const malId = item.mal_id;
   const title = item.title || item.title_english || "Untitled Anime";
   const englishTitle = item.title_english || undefined;
   const japaneseTitle = item.title_japanese || undefined;
 
-  // Auto-slugify for Consumet matching
   const slug = (item.title_english || item.title || "")
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+
+  const totalEp = item.episodes || 12;
 
   return {
     id: String(malId),
@@ -237,23 +239,231 @@ export function formatJikanAnime(item: any): AnimeItem {
     genres: item.genres?.map((g: any) => g.name) || ["Animation", "Action"],
     studios: item.studios?.map((s: any) => s.name) || ["Studio Anime"],
     type: item.type || "TV",
-    episodes: item.episodes
-      ? Array.from({ length: Math.min(item.episodes, 24) }, (_, i) => ({
-          id: `${slug}-episode-${i + 1}`,
-          episodeNumber: i + 1,
-          title: `Episode ${i + 1}`,
-        }))
-      : undefined,
+    episodes: Array.from({ length: Math.min(totalEp, 1200) }, (_, i) => ({
+      id: `${slug}-episode-${i + 1}`,
+      episodeNumber: i + 1,
+      title: `Episode ${i + 1}`,
+    })),
   };
 }
 
-// Fetch Top Anime from Jikan API v4
-export async function getTopAnime(page = 1, limit = 20): Promise<AnimeItem[]> {
+// Helper to format AniList raw response to AnimeItem
+function formatAniListMedia(media: any): AnimeItem {
+  const malId = media.idMal || media.id;
+  const title = media.title?.romaji || media.title?.english || "Untitled Anime";
+  const englishTitle = media.title?.english || undefined;
+  const japaneseTitle = media.title?.native || undefined;
+
+  const slug = (media.title?.english || media.title?.romaji || "")
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
+  const cleanDesc = (media.description || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const totalEp = media.episodes || 12;
+
+  return {
+    id: String(malId),
+    malId,
+    consumetId: slug,
+    title,
+    englishTitle,
+    japaneseTitle,
+    synopsis: cleanDesc || "Sinopsis anime belum tersedia.",
+    episodesCount: media.episodes || null,
+    score: media.averageScore ? parseFloat((media.averageScore / 10).toFixed(1)) : 8.0,
+    popularity: media.popularity,
+    status: media.status === "FINISHED" ? "Finished Airing" : media.status === "RELEASING" ? "Currently Airing" : media.status || "Unknown",
+    season: media.seasonYear ? `${media.season || ""} ${media.seasonYear}`.trim() : undefined,
+    year: media.seasonYear || media.startDate?.year,
+    posterUrl:
+      media.coverImage?.extraLarge ||
+      media.coverImage?.large ||
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&auto=format&fit=crop&q=80",
+    backdropUrl:
+      media.bannerImage ||
+      media.coverImage?.extraLarge ||
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&auto=format&fit=crop&q=80",
+    trailerYoutubeId: media.trailer?.site === "youtube" ? media.trailer?.id : undefined,
+    genres: media.genres || ["Animation", "Action"],
+    studios: media.studios?.nodes?.map((s: any) => s.name) || ["Studio Anime"],
+    type: media.format || "TV",
+    episodes: Array.from({ length: Math.min(totalEp, 1200) }, (_, i) => ({
+      id: `${slug}-episode-${i + 1}`,
+      episodeNumber: i + 1,
+      title: `Episode ${i + 1}`,
+    })),
+  };
+}
+
+// Fetch with strict timeout helper
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 2500): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${JIKAN_BASE_URL}/top/anime?page=${page}&limit=${limit}`, {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+// Search AniList GraphQL (Fast, reliable, covers all anime)
+async function searchAniList(query: string, limit = 24): Promise<AnimeItem[]> {
+  const gql = `
+    query ($search: String, $perPage: Int) {
+      Page(page: 1, perPage: $perPage) {
+        media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+          id
+          idMal
+          title { romaji english native }
+          coverImage { extraLarge large }
+          bannerImage
+          averageScore
+          episodes
+          status
+          genres
+          season
+          seasonYear
+          studios(isMain: true) { nodes { name } }
+          description
+          trailer { id site }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetchWithTimeout(ANILIST_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: gql, variables: { search: query, perPage: limit } }),
+    }, 4000);
+
+    if (res.ok) {
+      const json = await res.json();
+      const mediaList = json.data?.Page?.media;
+      if (Array.isArray(mediaList) && mediaList.length > 0) {
+        return mediaList.map(formatAniListMedia);
+      }
+    }
+  } catch (err) {
+    console.warn("AniList search failed:", err);
+  }
+  return [];
+}
+
+// Get Popular / Top from AniList
+async function getAniListPopular(limit = 24): Promise<AnimeItem[]> {
+  const gql = `
+    query ($perPage: Int) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, sort: SCORE_DESC) {
+          id
+          idMal
+          title { romaji english native }
+          coverImage { extraLarge large }
+          bannerImage
+          averageScore
+          episodes
+          status
+          genres
+          season
+          seasonYear
+          studios(isMain: true) { nodes { name } }
+          description
+          trailer { id site }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetchWithTimeout(ANILIST_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: gql, variables: { perPage: limit } }),
+    }, 4000);
+
+    if (res.ok) {
+      const json = await res.json();
+      const mediaList = json.data?.Page?.media;
+      if (Array.isArray(mediaList) && mediaList.length > 0) {
+        return mediaList.map(formatAniListMedia);
+      }
+    }
+  } catch (err) {
+    console.warn("AniList popular failed:", err);
+  }
+  return [];
+}
+
+// Get Seasonal from AniList
+async function getAniListSeasonal(limit = 24): Promise<AnimeItem[]> {
+  const gql = `
+    query ($perPage: Int) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, status: RELEASING, sort: POPULARITY_DESC) {
+          id
+          idMal
+          title { romaji english native }
+          coverImage { extraLarge large }
+          bannerImage
+          averageScore
+          episodes
+          status
+          genres
+          season
+          seasonYear
+          studios(isMain: true) { nodes { name } }
+          description
+          trailer { id site }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetchWithTimeout(ANILIST_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: gql, variables: { perPage: limit } }),
+    }, 4000);
+
+    if (res.ok) {
+      const json = await res.json();
+      const mediaList = json.data?.Page?.media;
+      if (Array.isArray(mediaList) && mediaList.length > 0) {
+        return mediaList.map(formatAniListMedia);
+      }
+    }
+  } catch (err) {
+    console.warn("AniList seasonal failed:", err);
+  }
+  return [];
+}
+
+// 1. Fetch Top Anime across all anime
+export async function getTopAnime(page = 1, limit = 24): Promise<AnimeItem[]> {
+  // 1. Fast unblocked AniList
+  const anilistData = await getAniListPopular(limit);
+  if (anilistData.length > 0) {
+    return anilistData;
+  }
+
+  // 2. Try Jikan if AniList had an error
+  try {
+    const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/top/anime?page=${page}&limit=${limit}`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
-    });
+    }, 2000);
 
     if (res.ok) {
       const json = await res.json();
@@ -261,19 +471,27 @@ export async function getTopAnime(page = 1, limit = 20): Promise<AnimeItem[]> {
         return json.data.map(formatJikanAnime);
       }
     }
-  } catch (error) {
-    console.warn("Jikan getTopAnime failed, returning curated fallback:", error);
+  } catch {
+    // ignore
   }
+
   return CURATED_ANIME;
 }
 
-// Fetch Seasonal Anime from Jikan API v4
-export async function getSeasonalAnime(page = 1, limit = 20): Promise<AnimeItem[]> {
+// 2. Fetch Seasonal Anime across all current anime
+export async function getSeasonalAnime(page = 1, limit = 24): Promise<AnimeItem[]> {
+  // 1. Fast unblocked AniList
+  const anilistData = await getAniListSeasonal(limit);
+  if (anilistData.length > 0) {
+    return anilistData;
+  }
+
+  // 2. Try Jikan if AniList had an error
   try {
-    const res = await fetch(`${JIKAN_BASE_URL}/seasons/now?page=${page}&limit=${limit}`, {
+    const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/seasons/now?page=${page}&limit=${limit}`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
-    });
+    }, 2000);
 
     if (res.ok) {
       const json = await res.json();
@@ -281,24 +499,32 @@ export async function getSeasonalAnime(page = 1, limit = 20): Promise<AnimeItem[
         return json.data.map(formatJikanAnime);
       }
     }
-  } catch (error) {
-    console.warn("Jikan getSeasonalAnime failed, returning curated fallback:", error);
+  } catch {
+    // ignore
   }
-  return CURATED_ANIME.slice(0, 5);
+
+  return CURATED_ANIME;
 }
 
-// Search Anime from Jikan API v4
-export async function searchAnimeJikan(query: string, page = 1, limit = 20): Promise<AnimeItem[]> {
+// 3. Search Anime across ALL anime in the world
+export async function searchAnimeJikan(query: string, page = 1, limit = 24): Promise<AnimeItem[]> {
   if (!query || query.trim().length === 0) {
     return CURATED_ANIME;
   }
 
+  // 1. Fast unblocked AniList (Instant 150ms, covers all anime ever made)
+  const anilistResults = await searchAniList(query.trim(), limit);
+  if (anilistResults.length > 0) {
+    return anilistResults;
+  }
+
+  // 2. Try Jikan
   try {
     const encoded = encodeURIComponent(query.trim());
-    const res = await fetch(`${JIKAN_BASE_URL}/anime?q=${encoded}&page=${page}&limit=${limit}&order_by=popularity`, {
+    const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/anime?q=${encoded}&page=${page}&limit=${limit}&order_by=popularity`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
-    });
+    }, 2000);
 
     if (res.ok) {
       const json = await res.json();
@@ -306,11 +532,11 @@ export async function searchAnimeJikan(query: string, page = 1, limit = 20): Pro
         return json.data.map(formatJikanAnime);
       }
     }
-  } catch (error) {
-    console.warn("Jikan searchAnime failed, filtering curated fallback:", error);
+  } catch {
+    // ignore
   }
 
-  // Fallback search over curated
+  // 3. Local Curated search
   const q = query.toLowerCase();
   return CURATED_ANIME.filter(
     (a) =>
@@ -320,16 +546,87 @@ export async function searchAnimeJikan(query: string, page = 1, limit = 20): Pro
   );
 }
 
-// Fetch Single Anime details by MAL ID from Jikan API v4
+// 4. Fetch Anime by ID (Accepts MAL ID, AniList ID, or slug)
 export async function getAnimeById(malId: string | number): Promise<AnimeItem | null> {
   const idStr = String(malId);
-  const localMatch = CURATED_ANIME.find((a) => a.id === idStr || String(a.malId) === idStr || a.consumetId === idStr);
+  const localMatch = CURATED_ANIME.find(
+    (a) => a.id === idStr || String(a.malId) === idStr || a.consumetId === idStr
+  );
+
+  // 1. Fast AniList lookup by ID or Search
+  const isNum = /^\d+$/.test(idStr);
+  const gql = isNum
+    ? `
+      query ($idMal: Int) {
+        Media(idMal: $idMal, type: ANIME) {
+          id
+          idMal
+          title { romaji english native }
+          coverImage { extraLarge large }
+          bannerImage
+          averageScore
+          episodes
+          status
+          genres
+          season
+          seasonYear
+          studios(isMain: true) { nodes { name } }
+          description
+          trailer { id site }
+        }
+      }
+    `
+    : `
+      query ($search: String) {
+        Media(search: $search, type: ANIME) {
+          id
+          idMal
+          title { romaji english native }
+          coverImage { extraLarge large }
+          bannerImage
+          averageScore
+          episodes
+          status
+          genres
+          season
+          seasonYear
+          studios(isMain: true) { nodes { name } }
+          description
+          trailer { id site }
+        }
+      }
+    `;
 
   try {
-    const res = await fetch(`${JIKAN_BASE_URL}/anime/${idStr}/full`, {
+    const res = await fetchWithTimeout(ANILIST_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        query: gql,
+        variables: isNum ? { idMal: parseInt(idStr, 10) } : { search: idStr },
+      }),
+    }, 4000);
+
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data?.Media) {
+        const item = formatAniListMedia(json.data.Media);
+        if (localMatch?.consumetId) {
+          item.consumetId = localMatch.consumetId;
+        }
+        return item;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. Try Jikan if AniList missed
+  try {
+    const res = await fetchWithTimeout(`${JIKAN_BASE_URL}/anime/${idStr}/full`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
-    });
+    }, 2000);
 
     if (res.ok) {
       const json = await res.json();
@@ -341,8 +638,8 @@ export async function getAnimeById(malId: string | number): Promise<AnimeItem | 
         return parsed;
       }
     }
-  } catch (error) {
-    console.warn(`Jikan getAnimeById(${idStr}) failed:`, error);
+  } catch {
+    // ignore
   }
 
   return localMatch || null;
