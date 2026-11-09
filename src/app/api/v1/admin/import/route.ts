@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { tmdbId, type } = await request.json();
+    const { tmdbId, type = "movie" } = await request.json();
 
     if (!tmdbId) {
       return NextResponse.json(
@@ -11,7 +11,66 @@ export async function POST(request: Request) {
       );
     }
 
-    // Curated standard metadata responses for open/public domain cinematic entries
+    const token = process.env.TMDB_ACCESS_TOKEN;
+    const apiKey = process.env.TMDB_API_KEY;
+
+    // If live TMDB token or key is configured, call official TMDB API
+    if (token || apiKey) {
+      const url = `https://api.themoviedb.org/3/${type === "series" ? "tv" : "movie"}/${tmdbId}?language=id-ID&append_to_response=credits`;
+      const headers: Record<string, string> = {
+        accept: "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const fetchUrl = !token && apiKey ? `${url}&api_key=${apiKey}` : url;
+
+      try {
+        const tmdbRes = await fetch(fetchUrl, { headers });
+        if (tmdbRes.ok) {
+          const raw = await tmdbRes.json();
+          const directors =
+            raw.credits?.crew
+              ?.filter((c: any) => c.job === "Director")
+              ?.map((d: any) => d.name) || [];
+
+          const genres = raw.genres?.map((g: any) => g.name) || ["Drama"];
+
+          return NextResponse.json({
+            success: true,
+            source: "tmdb-live-api",
+            message: "Metadata berhasil diambil langsung dari API TMDB.",
+            data: {
+              tmdbId: String(raw.id),
+              title: raw.title || raw.name,
+              originalTitle: raw.original_title || raw.original_name,
+              releaseYear: raw.release_date
+                ? new Date(raw.release_date).getFullYear()
+                : raw.first_air_date
+                ? new Date(raw.first_air_date).getFullYear()
+                : 2024,
+              durationMinutes: raw.runtime || 90,
+              rating: raw.vote_average ? parseFloat(raw.vote_average.toFixed(1)) : 8.0,
+              synopsis: raw.overview || "Sinopsis belum tersedia dalam Bahasa Indonesia di TMDB.",
+              posterUrl: raw.poster_path
+                ? `https://image.tmdb.org/t/p/w780${raw.poster_path}`
+                : "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80",
+              backdropUrl: raw.backdrop_path
+                ? `https://image.tmdb.org/t/p/original${raw.backdrop_path}`
+                : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920&auto=format&fit=crop&q=80",
+              genres,
+              directors: directors.length > 0 ? directors : ["Sutradara Independen"],
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Live TMDB fetch failed, falling back to directory:", err);
+      }
+    }
+
+    // Curated standard metadata responses for open/public domain cinematic entries fallback
     const mockTMDBDirectory: Record<string, any> = {
       "290098": {
         tmdbId: "290098",
@@ -57,7 +116,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Metadata TMDB berhasil diverifikasi dan disiapkan.",
+      source: "cached-curated",
+      message: "Metadata TMDB berhasil disiapkan.",
       data: entry,
     });
   } catch (error) {
@@ -67,4 +127,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
