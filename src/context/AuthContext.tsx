@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Strict Role Resolver: ONLY the exact email defined in NEXT_PUBLIC_ADMIN_EMAIL is granted ADMIN
   const resolveRole = (email: string | null): "ADMIN" | "USER" => {
     if (!email) return "USER";
-    const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").trim().toLowerCase();
+    const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "wildannraw145@gmail.com").trim().toLowerCase();
 
     // Strict match against designated single admin email
     if (adminEmail && email.trim().toLowerCase() === adminEmail) {
