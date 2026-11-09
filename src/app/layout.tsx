@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navigation/Navbar";
 import { MobileBottomNavigation } from "@/components/navigation/MobileBottomNavigation";
 import { Footer } from "@/components/navigation/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "TREASIBOX — Cinematic Streaming Platform",
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="id" className="h-full antialiased dark">
       <body className="min-h-full flex flex-col bg-[#09090B] text-[#FAFAFA] font-sans">
-        <Navbar />
-        <main className="flex-1 w-full">{children}</main>
-        <Footer />
-        <MobileBottomNavigation />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1 w-full">{children}</main>
+          <Footer />
+          <MobileBottomNavigation />
+        </AuthProvider>
       </body>
     </html>
   );
